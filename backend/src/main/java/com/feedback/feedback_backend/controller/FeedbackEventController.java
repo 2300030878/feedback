@@ -1,0 +1,71 @@
+package com.feedback.feedback_backend.controller;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.feedback.feedback_backend.model.FeedbackEvent;
+import com.feedback.feedback_backend.model.User;
+import com.feedback.feedback_backend.service.FeedbackEventService;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/events")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
+public class FeedbackEventController {
+    private final FeedbackEventService eventService;
+
+    @PostMapping
+    public ResponseEntity<FeedbackEvent> create(@RequestBody Map<String, String> in) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User admin = (User) auth.getPrincipal();
+        String title = in.get("title");
+        Long subjectId = Long.valueOf(in.get("subjectId"));
+        String description = in.get("description");
+        LocalDateTime startAt = LocalDateTime.parse(in.get("startAt"));
+        LocalDateTime endAt = LocalDateTime.parse(in.get("endAt"));
+        return ResponseEntity.ok(eventService.create(title, subjectId, description, startAt, endAt, admin.getUserId()));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<FeedbackEvent>> active() {
+        return ResponseEntity.ok(eventService.listActive());
+    }
+
+    @GetMapping("/past")
+    public ResponseEntity<List<FeedbackEvent>> past() {
+        return ResponseEntity.ok(eventService.listPast());
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FeedbackEvent>> all() {
+        return ResponseEntity.ok(eventService.listAll());
+    }
+
+    @GetMapping("/subject/{subjectId}")
+    public ResponseEntity<List<FeedbackEvent>> bySubject(@PathVariable Long subjectId) {
+        return ResponseEntity.ok(eventService.listBySubject(subjectId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FeedbackEvent> update(@PathVariable Long id, @RequestBody Map<String, String> in) {
+        LocalDateTime startAt = in.get("startAt") != null ? LocalDateTime.parse(in.get("startAt")) : null;
+        LocalDateTime endAt = in.get("endAt") != null ? LocalDateTime.parse(in.get("endAt")) : null;
+        return ResponseEntity.ok(eventService.update(id, in.get("title"), in.get("description"), startAt, endAt));
+    }
+}
+
