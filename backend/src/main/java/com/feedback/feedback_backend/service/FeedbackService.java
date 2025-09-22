@@ -73,7 +73,7 @@ public class FeedbackService {
     }
     
     public List<FeedbackResponse> getAllFeedback() {
-        return feedbackRepository.findAll()
+        return feedbackRepository.findAllWithDetails()
             .stream()
             .map(FeedbackResponse::new)
             .collect(Collectors.toList());

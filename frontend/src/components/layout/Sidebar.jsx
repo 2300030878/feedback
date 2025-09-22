@@ -20,7 +20,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigation = [
     { name: 'Dashboard', href: '/student/dashboard', icon: Home, roles: ['STUDENT'] },
     { name: 'Submit Feedback', href: '/student/feedback', icon: MessageSquare, roles: ['STUDENT'] },
-    { name: 'Faculty Dashboard', href: '/faculty/dashboard', icon: Home, roles: ['FACULTY'] },
+    { name: 'Dashboard', href: '/faculty/dashboard', icon: Home, roles: ['FACULTY'] },
+    { name: 'Feedback Review', href: '/faculty/review', icon: MessageSquare, roles: ['FACULTY'] },
     { name: 'Admin Dashboard', href: '/admin/dashboard', icon: BarChart3, roles: ['ADMIN'] },
     { name: 'Feedback Management', href: '/admin/events', icon: MessageSquare, roles: ['ADMIN'] },
     { name: 'Manage Students', href: '/admin/students', icon: Users, roles: ['ADMIN'] },

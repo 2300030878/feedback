@@ -90,6 +90,7 @@ export const FeedbackProvider = ({ children }) => {
       const response = await feedbackAPI.submit(feedbackData);
       setFeedbacks(prev => [...prev, response.data]);
       try { window.dispatchEvent(new CustomEvent('feedback:data:changed', { detail: { type: 'feedbacks' } })); } catch (_) {}
+      try { window.dispatchEvent(new CustomEvent('feedback:events:changed')); } catch (_) {}
       return response.data;
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit feedback');
@@ -153,7 +154,7 @@ export const FeedbackProvider = ({ children }) => {
   const refreshAll = useCallback(async () => {
     const now = Date.now();
     if (inFlightRef.current) return inFlightRef.current; // de-dup
-    if (now - lastRefreshAtRef.current < 5000) return; // throttle 5s
+    if (now - lastRefreshAtRef.current < 15000) return; // throttle 15s
     inFlightRef.current = (async () => {
       try {
         const [subs, facs, fbs, studs] = await Promise.all([

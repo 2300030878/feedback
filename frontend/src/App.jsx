@@ -25,6 +25,7 @@ import AdminAnalytics from './components/admin/AdminAnalytics';
 import AdminCreateEvent from './components/admin/AdminCreateEvent';
 import AdminStudents from './components/admin/AdminStudents';
 import FacultyDashboard from './components/faculty/FacultyDashboard';
+import FacultyReview from './components/faculty/FacultyReview';
 import Settings from './components/Settings';
 
 // Error Pages
@@ -99,6 +100,14 @@ const App = () => {
                 element={
                   <ProtectedRoute requiredRole="FACULTY">
                     <FacultyDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/faculty/review" 
+                element={
+                  <ProtectedRoute requiredRole="FACULTY">
+                    <FacultyReview />
                   </ProtectedRoute>
                 } 
               />

@@ -37,7 +37,7 @@ const AdminDashboard = () => {
     load();
     const id = setInterval(load, 15000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [refreshAll]);
+  }, []); // Remove refreshAll from dependencies to prevent infinite loops
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -49,7 +49,7 @@ const AdminDashboard = () => {
       }
     };
     loadAnalytics();
-  }, [getOverallAnalytics]);
+  }, []); // Remove getOverallAnalytics from dependencies to prevent infinite loops
 
   useEffect(() => {
     if (subjects && faculty && feedbacks) {

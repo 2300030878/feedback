@@ -13,7 +13,8 @@ import Card from '../ui/Card';
 
 const schema = yup.object({
   email: yup.string().email('Invalid email format').required('Email is required'),
-  password: yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+  // Keep frontend leniency; backend will validate credentials
+  password: yup.string().required('Password is required'),
 });
 
 const Login = () => {

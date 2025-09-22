@@ -61,6 +61,26 @@ public class FeedbackEventController {
         return ResponseEntity.ok(eventService.listAll());
     }
 
+    @GetMapping("/student/me")
+    public ResponseEntity<Map<String, List<FeedbackEvent>>> forStudent() {
+        // For now, return global segmentation; if student-specific mapping is needed later, filter here
+        var now = java.time.LocalDateTime.now();
+        var all = eventService.listAll();
+        var upcoming = new java.util.ArrayList<FeedbackEvent>();
+        var active = new java.util.ArrayList<FeedbackEvent>();
+        var past = new java.util.ArrayList<FeedbackEvent>();
+        for (var e : all) {
+            if (now.isBefore(e.getStartAt())) upcoming.add(e);
+            else if (now.isAfter(e.getEndAt())) past.add(e);
+            else active.add(e);
+        }
+        return ResponseEntity.ok(java.util.Map.of(
+            "upcoming", upcoming,
+            "active", active,
+            "past", past
+        ));
+    }
+
     @GetMapping("/subject/{subjectId}")
     public ResponseEntity<List<FeedbackEvent>> bySubject(@PathVariable Long subjectId) {
         return ResponseEntity.ok(eventService.listBySubject(subjectId));

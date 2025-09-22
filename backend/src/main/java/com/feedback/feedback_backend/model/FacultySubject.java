@@ -1,5 +1,7 @@
 package com.feedback.feedback_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class FacultySubject {
     
     @Id
@@ -36,5 +39,22 @@ public class FacultySubject {
     public FacultySubject(Faculty faculty, Subject subject) {
         this.faculty = faculty;
         this.subject = subject;
+    }
+    
+    // Computed properties to avoid lazy loading issues
+    public Long getFacultyId() {
+        return faculty != null ? faculty.getFacultyId() : null;
+    }
+    
+    public String getFacultyName() {
+        return faculty != null ? faculty.getName() : null;
+    }
+    
+    public Long getSubjectId() {
+        return subject != null ? subject.getSubjectId() : null;
+    }
+    
+    public String getSubjectName() {
+        return subject != null ? subject.getSubjectName() : null;
     }
 }

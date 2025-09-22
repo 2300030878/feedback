@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFeedback } from '../../contexts/FeedbackContext';
-import { MessageSquare, Star, Calendar, User, BookOpen, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Star, Calendar, User, BookOpen } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import StatusBadge from '../ui/StatusBadge';
@@ -12,58 +11,30 @@ import { Link } from 'react-router-dom';
 const MyFeedback = () => {
   const { user } = useAuth();
   const { fetchFeedbacks, feedbacks, loading } = useFeedback();
-  const [userFeedbacks, setUserFeedbacks] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const loadFeedbacks = async () => {
       try {
         await fetchFeedbacks();
       } catch (error) {
-        console.log('Failed to fetch feedbacks, using mock data');
+        console.log('Failed to fetch feedbacks');
       }
     };
     loadFeedbacks();
-  }, [fetchFeedbacks]);
+  }, []); // Remove fetchFeedbacks from dependencies to prevent infinite loops
 
-  useEffect(() => {
-    if (feedbacks && Array.isArray(feedbacks) && user) {
-      const userFeedbackList = feedbacks.filter(feedback => feedback.studentId === user.userId);
-      setUserFeedbacks(userFeedbackList);
-    } else {
-      setUserFeedbacks([]);
+  // Use useMemo to prevent unnecessary re-filtering
+  const displayFeedbacks = useMemo(() => {
+    if (!feedbacks || !Array.isArray(feedbacks) || !user?.userId) {
+      return [];
     }
-  }, [feedbacks, user]);
-
-  // Mock data for demonstration
-  const mockFeedbacks = [
-    {
-      id: 1,
-      subject: { name: 'Data Structures' },
-      faculty: { name: 'Dr. Smith' },
-      rating: 4,
-      comments: 'Great course with excellent explanations. The assignments were challenging but fair.',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      subject: { name: 'Algorithms' },
-      faculty: { name: 'Dr. Johnson' },
-      rating: 5,
-      comments: 'Outstanding professor! Very clear explanations and helpful office hours.',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-    {
-      id: 3,
-      subject: { name: 'Database Systems' },
-      faculty: { name: 'Dr. Brown' },
-      rating: 3,
-      comments: 'Good course but could use more practical examples.',
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-    }
-  ];
-
-  const displayFeedbacks = (userFeedbacks && userFeedbacks.length > 0) ? userFeedbacks : mockFeedbacks;
+    
+    return feedbacks.filter(feedback => 
+      feedback.studentId === user.userId || 
+      feedback.student?.userId === user.userId ||
+      feedback.student?.id === user.userId
+    );
+  }, [feedbacks, user?.userId]);
 
   if (loading) {
     return (
@@ -78,38 +49,10 @@ const MyFeedback = () => {
   return (
     <Layout title="My Feedback">
       <div className="space-y-6">
-        {/* API Status Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Demo Mode
-              </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>Backend API is not connected. Showing demo feedback data for demonstration purposes.</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center space-x-4 mb-2">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/student/dashboard')}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Dashboard</span>
-              </Button>
-            </div>
             <h1 className="text-3xl font-bold text-gray-900">My Feedback</h1>
             <p className="text-gray-600 mt-2">View and manage your submitted feedback</p>
           </div>
@@ -197,8 +140,8 @@ const MyFeedback = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {displayFeedbacks.map((feedback) => (
-                  <div key={feedback.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {displayFeedbacks.map((feedback, index) => (
+                  <div key={feedback.feedbackId || feedback.id || `feedback-${index}`} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-4 mb-3">

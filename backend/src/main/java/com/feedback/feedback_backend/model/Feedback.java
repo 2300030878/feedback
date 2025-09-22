@@ -2,6 +2,8 @@ package com.feedback.feedback_backend.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class Feedback {
     
     @Id
@@ -60,5 +63,34 @@ public class Feedback {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+    
+    // Computed properties to avoid lazy loading issues
+    public Long getStudentId() {
+        return student != null ? student.getUserId() : null;
+    }
+    
+    public String getStudentName() {
+        return student != null ? student.getName() : null;
+    }
+    
+    public Long getFacultyId() {
+        return faculty != null ? faculty.getFacultyId() : null;
+    }
+    
+    public String getFacultyName() {
+        return faculty != null ? faculty.getName() : null;
+    }
+    
+    public Long getSubjectId() {
+        return subject != null ? subject.getSubjectId() : null;
+    }
+    
+    public String getSubjectName() {
+        return subject != null ? subject.getSubjectName() : null;
+    }
+    
+    public Long getEventId() {
+        return event != null ? event.getEventId() : null;
     }
 }

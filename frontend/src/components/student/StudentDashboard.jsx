@@ -39,15 +39,7 @@ const StudentDashboard = () => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  if (loading) {
-    return (
-      <Layout title="Dashboard">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </Layout>
-    );
-  }
+  // Never block dashboard; show zeros and update in background
 
   // Show dashboard even if data is still loading
 
@@ -118,34 +110,9 @@ const StudentDashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Quick Actions */}
-          <div className="lg:col-span-1">
-            <Card>
-              <Card.Header title="Quick Actions" subtitle="Get started with these common tasks">
-                <Button variant="primary" size="sm" icon={<Plus className="w-4 h-4" />}>
-                  <Link to="/student/feedback">Submit New Feedback</Link>
-                </Button>
-              </Card.Header>
-              
-              <Card.Content>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start" icon={<MessageSquare className="w-4 h-4" />}>
-                    <Link to="/student/feedback">Submit Feedback</Link>
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" icon={<BookOpen className="w-4 h-4" />}>
-                    <Link to="/student/my-feedback">View My Feedback</Link>
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start" icon={<Users className="w-4 h-4" />}>
-                    <Link to="/student/feedback">View Faculty</Link>
-                  </Button>
-                </div>
-              </Card.Content>
-            </Card>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Feedback */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Card>
               <Card.Header title="Recent Feedback" subtitle="Your latest feedback submissions">
                 <Button variant="outline" size="sm">
@@ -165,8 +132,8 @@ const StudentDashboard = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {recentFeedbacks.map((feedback) => (
-                      <div key={feedback.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    {recentFeedbacks.map((feedback, index) => (
+                      <div key={feedback.feedbackId || feedback.id || `recent-feedback-${index}`} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-4">
                           <div className="p-2 bg-blue-100 rounded-lg">
                             <MessageSquare className="w-5 h-5 text-blue-600" />

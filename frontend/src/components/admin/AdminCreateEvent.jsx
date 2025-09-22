@@ -95,7 +95,7 @@ const AdminCreateEvent = () => {
     window.addEventListener('feedback:events:changed', onChanged);
     const id = setInterval(loadLists, 30000); // refresh every 30s
     return () => { clearInterval(id); window.removeEventListener('feedback:events:changed', onChanged); };
-  }, [loadLists]);
+  }, []); // Remove loadLists from dependencies to prevent infinite loops
 
   return (
     <Layout title="Feedback Management">

@@ -3,6 +3,7 @@ package com.feedback.feedback_backend.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,10 +13,24 @@ import com.feedback.feedback_backend.model.Feedback;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
+    @Query("SELECT f FROM Feedback f")
+    List<Feedback> findAllWithDetails();
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
     List<Feedback> findByStudentUserId(Long studentId);
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
     List<Feedback> findByFacultyFacultyId(Long facultyId);
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
     List<Feedback> findBySubjectSubjectId(Long subjectId);
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
     List<Feedback> findByEventEventId(Long eventId);
+    
+    @EntityGraph(attributePaths = {"student", "faculty", "subject", "event"})
     List<Feedback> findByFacultyFacultyIdAndSubjectSubjectId(Long facultyId, Long subjectId);
     
     @Query("SELECT f FROM Feedback f WHERE f.student.userId = :studentId AND f.faculty.facultyId = :facultyId AND f.subject.subjectId = :subjectId")

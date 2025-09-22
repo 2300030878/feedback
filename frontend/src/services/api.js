@@ -98,6 +98,7 @@ export const feedbackAPI = {
   getById: (id) => api.get(`/feedback/${id}`),
   getByStudent: (studentId) => api.get(`/feedback/student/${studentId}`),
   getByFaculty: (facultyId) => api.get(`/feedback/faculty/${facultyId}`),
+  getMineForFaculty: () => api.get('/feedback/faculty/me'),
   getBySubject: (subjectId) => api.get(`/feedback/subject/${subjectId}`),
   submit: (feedback) => api.post('/feedback', feedback),
 };
@@ -125,6 +126,7 @@ export const eventsAPI = {
   bySubject: (subjectId) => api.get(`/events/subject/${subjectId}`),
   past: () => api.get('/events/past'),
   upcoming: () => api.get('/events/upcoming'),
+  forStudent: () => api.get('/events/student/me'),
 };
 
 export default api;

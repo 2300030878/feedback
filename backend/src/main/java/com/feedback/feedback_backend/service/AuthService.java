@@ -56,14 +56,30 @@ public class AuthService {
     }
     
     public AuthResponse login(AuthRequest request) {
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        
+        try {
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+        } catch (Exception ex) {
+            // Legacy fallback: if DB has plain text password, migrate to bcrypt on successful raw match
+            User legacy = userRepository.findByEmail(request.getEmail()).orElse(null);
+            if (legacy != null) {
+                String stored = legacy.getPasswordHash();
+                boolean looksHashed = stored != null && stored.startsWith("$2");
+                if (!looksHashed && stored != null && stored.equals(request.getPassword())) {
+                    legacy.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+                    userRepository.save(legacy);
+                } else {
+                    throw ex; // wrong credentials
+                }
+            } else {
+                throw ex;
+            }
+        }
+
         User user = userRepository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        // On FACULTY login, sync Faculty table by email
         if (user.getRole() == User.Role.FACULTY) {
             facultyRepository.findByEmail(user.getEmail())
                 .orElseGet(() -> {
