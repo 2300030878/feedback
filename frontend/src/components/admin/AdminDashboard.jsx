@@ -2,18 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFeedback } from '../../contexts/FeedbackContext';
-import { 
-  Users, 
-  BookOpen, 
-  MessageSquare, 
-  TrendingUp, 
-  Star,
-  BarChart3,
-  Eye,
-  AlertTriangle,
-  CheckCircle,
-  Clock
-} from 'lucide-react';
+import { Users, BookOpen, MessageSquare, Star, Eye, AlertTriangle } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import StatusBadge from '../ui/StatusBadge';
@@ -22,14 +11,13 @@ import Layout from '../layout/Layout';
 const AdminDashboard = () => {
   const { user } = useAuth();
   const { 
-    fetchSubjects, 
-    fetchFaculty, 
-    fetchFeedbacks, 
+    refreshAll,
     getOverallAnalytics,
     subjects, 
     faculty, 
     feedbacks, 
-    loading 
+    loading,
+    studentsCount,
   } = useFeedback();
   
   const [analytics, setAnalytics] = useState(null);
@@ -41,10 +29,15 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    fetchSubjects();
-    fetchFaculty();
-    fetchFeedbacks();
-  }, []);
+    let cancelled = false;
+    const load = async () => {
+      if (cancelled) return;
+      await refreshAll();
+    };
+    load();
+    const id = setInterval(load, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [refreshAll]);
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -72,17 +65,9 @@ const AdminDashboard = () => {
     }
   }, [subjects, faculty, feedbacks]);
 
-  if (loading) {
-    return (
-      <Layout title="Admin Dashboard">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </Layout>
-    );
-  }
+  // Never block the page with a loader; show cards with zeros until data arrives
 
-  const StatCard = ({ title, value, icon: Icon, color, description, trend }) => (
+  const StatCard = ({ title, value, icon: Icon, color, description }) => (
     <Card hover>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
@@ -97,12 +82,6 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
-        {trend && (
-          <div className={`flex items-center text-sm ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            <TrendingUp className={`w-4 h-4 mr-1 ${trend < 0 ? 'rotate-180' : ''}`} />
-            {Math.abs(trend)}%
-          </div>
-        )}
       </div>
     </Card>
   );
@@ -125,7 +104,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <StatCard
             title="Total Subjects"
             value={stats.totalSubjects}
@@ -141,6 +120,13 @@ const AdminDashboard = () => {
             color="bg-green-500"
             description="Registered faculty"
             trend={2}
+          />
+          <StatCard
+            title="Total Students"
+            value={studentsCount}
+            icon={Users}
+            color="bg-indigo-500"
+            description="Registered students"
           />
           <StatCard
             title="Total Feedback"
@@ -160,46 +146,7 @@ const AdminDashboard = () => {
           />
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <Card.Header title="Quick Actions" subtitle="Common administrative tasks">
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" size="sm">
-                  <Link to="/admin/students">Manage Students</Link>
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Link to="/admin/faculty">Manage Faculty</Link>
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Link to="/admin/subjects">Manage Subjects</Link>
-                </Button>
-                <Button variant="primary" size="sm">
-                  <Link to="/admin/analytics">View Analytics</Link>
-                </Button>
-              </div>
-            </Card.Header>
-          </Card>
-
-          <Card>
-            <Card.Header title="System Status" subtitle="Current system health">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Database</span>
-                  <StatusBadge status="success">Healthy</StatusBadge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">API Response</span>
-                  <StatusBadge status="success">Fast</StatusBadge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Active Users</span>
-                  <StatusBadge status="active">Online</StatusBadge>
-                </div>
-              </div>
-            </Card.Header>
-          </Card>
-        </div>
+        {/* Removed Quick Actions and System Status for a cleaner, data-first dashboard */}
 
         {/* Recent Feedback */}
         <Card>

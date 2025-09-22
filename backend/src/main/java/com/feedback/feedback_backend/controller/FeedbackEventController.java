@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173"}, maxAge = 3600)
 public class FeedbackEventController {
     private final FeedbackEventService eventService;
 
@@ -49,6 +49,11 @@ public class FeedbackEventController {
     @GetMapping("/past")
     public ResponseEntity<List<FeedbackEvent>> past() {
         return ResponseEntity.ok(eventService.listPast());
+    }
+
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<FeedbackEvent>> upcoming() {
+        return ResponseEntity.ok(eventService.listUpcoming());
     }
 
     @GetMapping
