@@ -13,5 +13,6 @@ public interface FeedbackEventRepository extends JpaRepository<FeedbackEvent, Lo
     List<FeedbackEvent> findBySubjectSubjectId(Long subjectId);
     List<FeedbackEvent> findByStartAtBeforeAndEndAtAfter(LocalDateTime now1, LocalDateTime now2);
     List<FeedbackEvent> findByEndAtBefore(LocalDateTime time);
+    List<FeedbackEvent> findByStartAtAfter(LocalDateTime time);
 }
 

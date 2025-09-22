@@ -26,7 +26,9 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Manage Students', href: '/admin/students', icon: Users, roles: ['ADMIN'] },
     { name: 'Manage Faculty', href: '/admin/faculty', icon: Users, roles: ['ADMIN'] },
     { name: 'Manage Subjects', href: '/admin/subjects', icon: BookOpen, roles: ['ADMIN'] },
-    { name: 'Settings', href: '/settings', icon: Settings, roles: ['STUDENT', 'FACULTY', 'ADMIN'] },
+    { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['ADMIN'] },
+    { name: 'Settings', href: '/faculty/settings', icon: Settings, roles: ['FACULTY'] },
+    { name: 'Settings', href: '/student/settings', icon: Settings, roles: ['STUDENT'] },
   ];
 
   const filteredNavigation = navigation.filter(item => 

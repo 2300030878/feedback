@@ -8,6 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 8000, // avoid browser resource spikes
 });
 
 // Add request interceptor to include auth token
@@ -59,6 +60,7 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
+  changePassword: (userId, payload) => api.post(`/auth/change-password/${userId}`, payload),
 };
 
 // Subjects API
@@ -122,6 +124,7 @@ export const eventsAPI = {
   active: () => api.get('/events/active'),
   bySubject: (subjectId) => api.get(`/events/subject/${subjectId}`),
   past: () => api.get('/events/past'),
+  upcoming: () => api.get('/events/upcoming'),
 };
 
 export default api;

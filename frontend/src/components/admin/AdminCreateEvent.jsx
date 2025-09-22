@@ -15,6 +15,7 @@ const AdminCreateEvent = () => {
   const [showForm, setShowForm] = useState(false);
   const [active, setActive] = useState([]);
   const [past, setPast] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -23,16 +24,32 @@ const AdminCreateEvent = () => {
       setLoading(true);
       setError('');
       setSuccess('');
-      await eventsAPI.create({
+      const res = await eventsAPI.create({
         title: form.title,
         subjectId: form.subject.subjectId,
         description: form.description,
         startAt: form.startAt,
         endAt: form.endAt,
       });
+      const created = res?.data;
       setSuccess('Event created successfully');
       setForm({ title: '', subject: null, description: '', startAt: '', endAt: '' });
       setShowForm(false);
+      // Immediate UI refresh (optimistic update) + background re-fetch
+      if (created) {
+        const now = new Date();
+        const s = new Date(created.startAt);
+        const e2 = new Date(created.endAt);
+        if (s <= now && now < e2) {
+          setActive((prev) => [{ ...created }, ...prev.filter(x => x.eventId !== created.eventId)]);
+        } else if (e2 < now) {
+          setPast((prev) => [{ ...created }, ...prev.filter(x => x.eventId !== created.eventId)]);
+        } else if (s > now) {
+          setUpcoming((prev) => [{ ...created }, ...prev.filter(x => x.eventId !== created.eventId)]);
+        }
+        // broadcast to any listeners (other tabs/components)
+        try { window.dispatchEvent(new CustomEvent('feedback:events:changed')); } catch (_) {}
+      }
       await loadLists();
     } catch (e) {
       setError(e.response?.data?.message || 'Failed to create event');
@@ -46,12 +63,14 @@ const AdminCreateEvent = () => {
       const now = new Date();
       // Try direct endpoints first
       try {
-        const [a, p] = await Promise.all([
+        const [a, p, u] = await Promise.all([
           eventsAPI.active(),
-          eventsAPI.past()
+          eventsAPI.past(),
+          eventsAPI.upcoming()
         ]);
         setActive(a.data || []);
         setPast(p.data || []);
+        setUpcoming(u.data || []);
         return;
       } catch (_) {
         // Fallback: aggregate by subject if /past or /events fail
@@ -62,14 +81,20 @@ const AdminCreateEvent = () => {
         const all = lists.flat();
         const activeList = all.filter(ev => new Date(ev.startAt) <= now && now < new Date(ev.endAt));
         const pastList = all.filter(ev => new Date(ev.endAt) < now);
+        const upcomingList = all.filter(ev => new Date(ev.startAt) > now);
         setActive(activeList);
         setPast(pastList);
+        setUpcoming(upcomingList);
       }
     } catch (_) {}
   }, []);
 
   useEffect(() => {
     loadLists();
+    const onChanged = () => loadLists();
+    window.addEventListener('feedback:events:changed', onChanged);
+    const id = setInterval(loadLists, 30000); // refresh every 30s
+    return () => { clearInterval(id); window.removeEventListener('feedback:events:changed', onChanged); };
   }, [loadLists]);
 
   return (
@@ -112,6 +137,23 @@ const AdminCreateEvent = () => {
                         <li key={ev.eventId} className="p-3 bg-gray-50 rounded">
                           <div className="font-medium">{ev.title}</div>
                           <div className="text-sm text-gray-600">{new Date(ev.startAt).toLocaleString()} - {new Date(ev.endAt).toLocaleString()}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </Card.Content>
+              </Card>
+              <Card>
+                <Card.Header title="Upcoming Events" />
+                <Card.Content>
+                  {upcoming.length === 0 ? (
+                    <div className="text-gray-500">No upcoming events</div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {upcoming.map(ev => (
+                        <li key={ev.eventId} className="p-3 bg-gray-50 rounded">
+                          <div className="font-medium">{ev.title}</div>
+                          <div className="text-sm text-gray-600">Starts: {new Date(ev.startAt).toLocaleString()}</div>
                         </li>
                       ))}
                     </ul>

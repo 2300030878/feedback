@@ -48,6 +48,10 @@ public class FeedbackEventService {
         return eventRepository.findByEndAtBefore(LocalDateTime.now());
     }
 
+    public List<FeedbackEvent> listUpcoming() {
+        return eventRepository.findByStartAtAfter(LocalDateTime.now());
+    }
+
     public List<FeedbackEvent> listAll() {
         return eventRepository.findAll();
     }
